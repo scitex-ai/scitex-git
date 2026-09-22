@@ -2,8 +2,6 @@
 
 """Tests for git validation utilities."""
 
-import tempfile
-from pathlib import Path
 
 import pytest
 

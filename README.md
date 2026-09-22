@@ -14,22 +14,67 @@
 
 <!-- scitex-badges:start -->
 <p align="center">
-  <a href="https://pypi.org/project/scitex-git/"><img src="https://img.shields.io/pypi/v/scitex-git.svg" alt="PyPI"></a>
-  <a href="https://pypi.org/project/scitex-git/"><img src="https://img.shields.io/pypi/pyversions/scitex-git.svg" alt="Python"></a>
-  <a href="https://github.com/ywatanabe1989/scitex-git/actions/workflows/test.yml"><img src="https://github.com/ywatanabe1989/scitex-git/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <a href="https://codecov.io/gh/ywatanabe1989/scitex-git"><img src="https://codecov.io/gh/ywatanabe1989/scitex-git/graph/badge.svg" alt="Coverage"></a>
-  <a href="https://scitex-git.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/scitex-git/badge/?version=latest" alt="Docs"></a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0"><img src="https://img.shields.io/badge/license-AGPL_v3-blue.svg" alt="License: AGPL v3"></a>
+  <a href="https://pypi.org/project/scitex-git/"><img src="https://img.shields.io/pypi/v/scitex-git?label=pypi" alt="pypi"></a>
+  <a href="https://pypi.org/project/scitex-git/"><img src="https://img.shields.io/pypi/pyversions/scitex-git?label=python" alt="python"></a>
+  <a href="https://scitex-git.readthedocs.io/en/latest/"><img src="https://img.shields.io/readthedocs/scitex-git?label=docs" alt="docs"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/scitex-ai/scitex-git/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/scitex-ai/scitex-git/ci.yml?branch=develop&label=tests" alt="tests"></a>
+  <a href="https://codecov.io/gh/ywatanabe1989/scitex-git"><img src="https://img.shields.io/codecov/c/github/ywatanabe1989/scitex-git/develop?label=cov" alt="cov"></a>
 </p>
 <!-- scitex-badges:end -->
 
 ---
 
+## Quick Start
+
+```python
+import scitex_git as sxg
+
+sxg.clone_repo("https://github.com/foo/bar", "./bar")
+sxg.git_add_all("./bar")
+sxg.git_commit("./bar", message="initial")
+```
+
+## Demo
+
+```mermaid
+flowchart LR
+    A["scitex_git.clone_repo<br/>(url, dest)"] --> B["@git_retry<br/>(transient errors)"]
+    B --> C["repo on disk"]
+    C --> D["git_add_all + git_commit"]
+    D --> E["checkout_new_branch<br/>+ branch_rename"]
+    E --> F["get_remote_url /<br/>get_head_hash"]
+```
+
+<p align="center"><sub><b>Figure 1.</b> Core flow: clone under retry, commit, branch, then query remote state.</sub></p>
+
+```python
+>>> import scitex_git as sxg
+>>> sxg.clone_repo("https://github.com/foo/bar", "./bar")
+>>> sxg.git_add_all("./bar")
+>>> sxg.git_commit("./bar", message="initial")
+```
+
 ## Installation
 
 ```bash
-pip install scitex-git
+uv pip install "scitex-git[all]"
 ```
+
+Requires Python ≥ 3.9.
+
+<details>
+<summary><b>Per-extra installs</b></summary>
+
+<br>
+
+| Extra | Pulls in |
+|---|---|
+| `dev` | tests + lint + dev helpers (`pytest`, `ruff`, `scitex-dev`, …) |
+| `docs` | Sphinx docs build (`sphinx`, `myst-parser`, …) |
+
+</details>
 
 ## Architecture
 
@@ -47,8 +92,21 @@ scitex_git/
 └── _skills/           ← agent-facing skill pages
 ```
 
-Pure-stdlib core. `_vendor_sh.py` is intentionally tiny so the package
-has no `scitex.*` runtime dependency. The umbrella `scitex.git` import
+```mermaid
+flowchart LR
+    url["remote URL"] --> clone["clone_repo"]
+    clone --> repo[("repo on disk")]
+    repo --> add["git_add_all"]
+    add --> commit["git_commit"]
+    commit --> branch["checkout_new_branch<br/>branch_rename"]
+    repo --> remote["get_remote_url<br/>get_head_hash"]
+```
+
+<p align="center"><sub><b>Figure 2.</b> Module data flow: clone into a repo, mutate it (add/commit/branch), then read remote state back.</sub></p>
+
+Small core: only `GitPython` and `scitex-logging` are hard runtime
+dependencies. `_vendor_sh.py` is an intentionally tiny subprocess wrapper
+(replaces `scitex.sh`). The umbrella `scitex.git` import
 resolves through a `sys.modules` bridge.
 
 ## 1 Interfaces
@@ -93,38 +151,11 @@ def maybe_flaky_operation(): ...
 
 </details>
 
-## Demo
-
-```mermaid
-flowchart LR
-    A["scitex_git.clone_repo<br/>(url, dest)"] --> B["@git_retry<br/>(transient errors)"]
-    B --> C["repo on disk"]
-    C --> D["git_add_all + git_commit"]
-    D --> E["checkout_new_branch<br/>+ branch_rename"]
-    E --> F["get_remote_url /<br/>get_head_hash"]
-```
-
-```python
->>> import scitex_git as sxg
->>> sxg.clone_repo("https://github.com/foo/bar", "./bar")
->>> sxg.git_add_all("./bar")
->>> sxg.git_commit("./bar", message="initial")
-```
-
-## Quick Start
-
-```python
-import scitex_git as sxg
-
-sxg.clone_repo("https://github.com/foo/bar", "./bar")
-sxg.git_add_all("./bar")
-sxg.git_commit("./bar", message="initial")
-```
-
 ## Status
 
-Standalone fork of `scitex.git`. `scitex.logging.getLogger` is replaced by stdlib
-`logging.getLogger`; the `scitex.sh.sh` shell wrapper is replaced by a tiny
+Standalone fork of `scitex.git`. Status and diagnostic output goes through
+`scitex-logging` (`scitex_logging.getLogger`); the `scitex.sh.sh` shell
+wrapper is replaced by a tiny
 ~70-LOC `_vendor_sh.py` that supports just the call-shape used here. The
 optional `scitex.writer.verify_tree_structure` validation step in
 `create_child_git` is gated behind a `try/except` so it only runs when

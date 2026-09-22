@@ -9,13 +9,13 @@ Provides functions to initialize, find, and manage git repositories
 with different strategies (child, parent, origin).
 """
 
-from logging import getLogger
 from pathlib import Path
 from typing import Optional
 
+import scitex_logging as slogging
 from git import InvalidGitRepositoryError, Repo
 
-logger = getLogger(__name__)
+log = slogging.getLogger(__name__)
 
 
 def find_parent_git(project_dir: Path) -> Optional[Path]:
@@ -51,21 +51,21 @@ def remove_child_git(project_dir: Path) -> bool:
     child_git = project_dir / ".git"
 
     if not child_git.exists():
-        logger.info(f"No child .git found at {project_dir}")
+        log.info(f"No child .git found at {project_dir}")
         return True
 
     try:
         import shutil
 
-        logger.info("Removing child .git to use parent repository...")
+        log.info("Removing child .git to use parent repository...")
         shutil.rmtree(child_git)
-        logger.info(f"Removed child .git from {project_dir}")
+        log.info(f"Removed child .git from {project_dir}")
         return True
     except PermissionError as e:
-        logger.error(f"Permission denied removing .git from {project_dir}: {e}")
+        log.error(f"Permission denied removing .git from {project_dir}: {e}")
         return False
     except Exception as e:
-        logger.error(f"Failed to remove child .git from {project_dir}: {e}")
+        log.error(f"Failed to remove child .git from {project_dir}: {e}")
         return False
 
 
@@ -84,7 +84,7 @@ def create_child_git(project_dir: Path) -> Optional[Path]:
     try:
         try:
             repo = Repo(project_dir)
-            logger.info(f"Project is already a git repository at {project_dir}")
+            log.info(f"Project is already a git repository at {project_dir}")
             # Optional structure validation: only runs if scitex-writer is
             # installed AND the project happens to follow the writer-tree
             # convention. If either is false, fall through quietly — the
@@ -101,25 +101,25 @@ def create_child_git(project_dir: Path) -> Optional[Path]:
                 # doesn't follow the writer tree (config/, src/, ... etc).
                 # All are non-fatal here — the repo itself is still valid;
                 # tree validation is a writer-side concern.
-                logger.debug(f"Optional verify_tree_structure skipped: {_verify_err}")
+                log.debug(f"Optional verify_tree_structure skipped: {_verify_err}")
             return project_dir
         except InvalidGitRepositoryError:
-            logger.info(f"Initializing new git repository at {project_dir}")
+            log.info(f"Initializing new git repository at {project_dir}")
             repo = Repo.init(project_dir)
 
         repo.index.add(["."])
         repo.index.commit("Initial commit from scitex template")
 
-        logger.info(f"Git repository initialized at {project_dir}")
+        log.info(f"Git repository initialized at {project_dir}")
         return project_dir
     except PermissionError as e:
-        logger.error(f"Permission denied creating git repository at {project_dir}: {e}")
+        log.error(f"Permission denied creating git repository at {project_dir}: {e}")
         return None
     except OSError as e:
-        logger.error(f"IO error creating git repository at {project_dir}: {e}")
+        log.error(f"IO error creating git repository at {project_dir}: {e}")
         return None
     except Exception as e:
-        logger.error(f"Failed to create child git repository at {project_dir}: {e}")
+        log.error(f"Failed to create child git repository at {project_dir}: {e}")
         return None
 
 
@@ -141,36 +141,36 @@ def init_git_repo(
         Path to git repository root, or None if disabled
     """
     if git_strategy is None:
-        logger.info("Git initialization disabled (git_strategy=None)")
+        log.info("Git initialization disabled (git_strategy=None)")
         return None
 
     if git_strategy == "parent":
-        logger.info("Using 'parent' git strategy, searching for parent repository...")
+        log.info("Using 'parent' git strategy, searching for parent repository...")
         parent_git = find_parent_git(project_dir)
 
         if parent_git:
-            logger.info(f"Found parent git repository: {parent_git}")
+            log.info(f"Found parent git repository: {parent_git}")
             remove_child_git(project_dir)
             return parent_git
 
-        logger.warning(
+        log.warning(
             f"No parent git repository found for {project_dir}. "
             f"Degrading to 'child' strategy (isolated git repo)."
         )
         return create_child_git(project_dir)
 
     if git_strategy == "child":
-        logger.info("Using 'child' git strategy, creating isolated repository...")
+        log.info("Using 'child' git strategy, creating isolated repository...")
         return create_child_git(project_dir)
 
     if git_strategy == "origin":
-        logger.info("Using 'origin' git strategy, template git history preserved...")
+        log.info("Using 'origin' git strategy, template git history preserved...")
         try:
-            repo = Repo(project_dir)
-            logger.info(f"Found git repository at {project_dir}")
+            Repo(project_dir)
+            log.info(f"Found git repository at {project_dir}")
             return project_dir
         except InvalidGitRepositoryError:
-            logger.warning(
+            log.warning(
                 f"No git repository found at {project_dir}. "
                 f"Degrading to 'child' strategy."
             )

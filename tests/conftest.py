@@ -11,7 +11,6 @@ so `setdefault` would be a silent no-op.
 from __future__ import annotations
 
 import os
-import sys
 import sysconfig
 from pathlib import Path
 

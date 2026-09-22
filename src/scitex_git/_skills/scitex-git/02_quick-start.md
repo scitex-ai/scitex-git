@@ -31,7 +31,7 @@ git_commit("/tmp/new-repo", message="initial commit")
 from scitex_git import git_checkout_new_branch, git_branch_rename, setup_branches
 
 git_checkout_new_branch("/tmp/r", "feature/x")
-git_branch_rename("/tmp/r", old="master", new="main")
+git_branch_rename("/tmp/r", old="feature/old-name", new="feature/new-name")
 setup_branches("/tmp/r", main="main", develop="develop")
 ```
 

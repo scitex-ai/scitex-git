@@ -10,3 +10,18 @@ audit:
     files:
       - codecov.yml          # CI/coverage config — must live at repo root
 
+  # PS-231 (workflow-duplication) — reasoned exemption for the leaf CLA
+  # workflow (2026-09-22). `line: 0` is mandatory: the rule queries its
+  # site key as (path, 0) because a duplicated workflow is a whole FILE.
+  # Do NOT convert to a caller unilaterally: the leaf carries
+  # package-specific CLA copy (signatures/cla.json path, scitex-git CLA.md
+  # URL, custom signed/not-signed comments) that the org reusable's
+  # inputs (owner_allowlist only) cannot express. Same shape as the
+  # scitex-session exemption. Revisit if the reusable gains
+  # signature-path/message inputs.
+  exemptions:
+    PS-231:
+      - path: .github/workflows/cla.yml
+        line: 0
+        reason: "leaf CLA workflow carries package-specific signatures path, doc URL and custom comments the org reusable cannot express; conversion would silently drop them"
+

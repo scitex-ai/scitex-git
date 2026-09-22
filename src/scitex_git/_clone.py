@@ -8,12 +8,12 @@ Git clone operations.
 
 from pathlib import Path
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+log = slogging.getLogger(__name__)
 
 
 def clone_repo(
@@ -60,7 +60,7 @@ def clone_repo(
         )
 
     if not _validate_git_url(url):
-        logger.error(f"Invalid git URL: {url}")
+        log.error(f"Invalid git URL: {url}")
         return False
 
     cmd = ["git", "clone"]
@@ -76,11 +76,11 @@ def clone_repo(
     result = sh(cmd, verbose=verbose, return_as="dict")
 
     if not result["success"]:
-        logger.error(f"Failed to clone repository: {result['stderr']}")
+        log.error(f"Failed to clone repository: {result['stderr']}")
         return False
 
     if verbose:
-        logger.info(f"Repository cloned successfully{ref_info}")
+        log.info(f"Repository cloned successfully{ref_info}")
     return True
 
 
@@ -103,25 +103,25 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
     from ._utils import _in_directory
 
     if (repo_path / ".git").exists():
-        logger.warning("Git repository already initialized")
+        log.warning("Git repository already initialized")
         return False
 
     with _in_directory(repo_path):
         result = sh(["git", "init", "-b", "main"], verbose=verbose, return_as="dict")
 
         if not result["success"]:
-            logger.warning(f"Failed to initialize git repository: {result['stderr']}")
+            log.warning(f"Failed to initialize git repository: {result['stderr']}")
             return False
 
         if verbose:
-            logger.info("Git repository initialized")
+            log.info("Git repository initialized")
         return True
 
 
 def main(args):
     if args.action == "clone":
         if not args.url:
-            logger.error("URL required for clone action")
+            log.error("URL required for clone action")
             return EXIT_FAILURE
         success = clone_repo(
             args.url, args.path, branch=args.branch, tag=args.tag, verbose=args.verbose
