@@ -2,7 +2,6 @@
 
 """Tests for git clone operations."""
 
-from pathlib import Path
 
 import pytest
 

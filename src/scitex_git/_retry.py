@@ -6,6 +6,11 @@
 from __future__ import annotations
 
 import os
+import subprocess
+import time
+from typing import Callable, TypeVar
+
+import scitex_logging as slogging
 
 __FILE__ = "./src/scitex/git/retry.py"
 __DIR__ = os.path.dirname(__FILE__)
@@ -18,13 +23,7 @@ Handles git index.lock conflicts when multiple processes access git.
 Shared across all scitex modules.
 """
 
-import subprocess
-import time
-from typing import Callable, TypeVar
-
-from logging import getLogger
-
-logger = getLogger(__name__)
+log = slogging.getLogger(__name__)
 
 T = TypeVar("T")
 
@@ -87,7 +86,7 @@ def git_retry(
             )
 
             if "index.lock" in stderr and attempt < max_retries - 1:
-                logger.debug(
+                log.debug(
                     f"Git lock detected, retrying in {delay:.2f}s "
                     f"(attempt {attempt + 1}/{max_retries})"
                 )

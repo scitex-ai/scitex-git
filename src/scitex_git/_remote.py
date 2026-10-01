@@ -5,16 +5,17 @@
 Git remote operations.
 """
 
+import sys
 from pathlib import Path
 from typing import Optional
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+log = slogging.getLogger(__name__)
 
 
 def get_remote_url(
@@ -43,7 +44,7 @@ def get_remote_url(
     Check stderr via sh() directly if detailed error info is needed.
     """
     if not (repo_path / ".git").exists():
-        logger.warning(f"Not a git repository: {repo_path}")
+        log.warning(f"Not a git repository: {repo_path}")
         return None
 
     with _in_directory(repo_path):
@@ -55,7 +56,7 @@ def get_remote_url(
         if result["success"]:
             return result["stdout"].strip()
 
-        logger.debug(f"Remote '{remote_name}' not found in {repo_path}")
+        log.debug(f"Remote '{remote_name}' not found in {repo_path}")
         return None
 
 
@@ -183,7 +184,7 @@ def ls_remote(
 
     result = sh(cmd, verbose=verbose, return_as="dict")
     if not result["success"]:
-        logger.debug(f"ls-remote failed for {url}: {result.get('stderr', '')}")
+        log.debug(f"ls-remote failed for {url}: {result.get('stderr', '')}")
         return None
 
     stdout = result["stdout"].strip()
@@ -236,15 +237,15 @@ def main(args):
     if args.action == "get-url":
         url = get_remote_url(args.repo_path, args.remote_name, args.verbose)
         if url:
-            print(url)
+            sys.stdout.write(url + "\n")
             return EXIT_SUCCESS
         return EXIT_FAILURE
     elif args.action == "check-origin":
         if not args.expected_url:
-            logger.error("Expected URL required for check-origin action")
+            log.error("Expected URL required for check-origin action")
             return EXIT_FAILURE
         result = is_cloned_from(args.repo_path, args.expected_url, args.remote_name)
-        print(result)
+        sys.stdout.write(str(result) + "\n")
         return EXIT_SUCCESS if result else EXIT_FAILURE
 
 

@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "GitPython>=3.1",
+    "scitex-logging>=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -61,6 +62,10 @@ scitex-git = "scitex_git"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--disable-warnings"]
+markers = [
+    "smoke: fast CLI happy-path tests (<60s, runs on every PR)",
+    "e2e: end-to-end workflows against real subsystems (runs on every PR)",
+]
 
 [tool.coverage.run]
 parallel = true

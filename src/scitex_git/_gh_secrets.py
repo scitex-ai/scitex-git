@@ -37,9 +37,10 @@ import hashlib
 import json
 import subprocess
 from datetime import datetime, timezone
-from logging import getLogger
 
-logger = getLogger(__name__)
+import scitex_logging as slogging
+
+log = slogging.getLogger(__name__)
 
 __all__ = [
     "GhSecretError",

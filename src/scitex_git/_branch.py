@@ -16,14 +16,14 @@ Examples
 
 from pathlib import Path
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
 from ._validation import validate_branch_name, validate_path
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+log = slogging.getLogger(__name__)
 
 
 def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> bool:
@@ -54,16 +54,16 @@ def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> b
     """
     valid, error = validate_path(repo_path, must_exist=True)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     if not (repo_path / ".git").exists():
-        logger.error(f"Not a git repository: {repo_path}")
+        log.error(f"Not a git repository: {repo_path}")
         return False
 
     valid, error = validate_branch_name(new_name)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     with _in_directory(repo_path):
@@ -75,11 +75,11 @@ def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> b
             error_msg = (
                 result["stderr"].strip() if result["stderr"] else "Unknown error"
             )
-            logger.error(f"Failed to rename branch in {repo_path}: {error_msg}")
+            log.error(f"Failed to rename branch in {repo_path}: {error_msg}")
             return False
 
         if verbose:
-            logger.info(f"Branch renamed to {new_name}")
+            log.info(f"Branch renamed to {new_name}")
         return True
 
 
@@ -113,16 +113,16 @@ def git_checkout_new_branch(
     """
     valid, error = validate_path(repo_path, must_exist=True)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     if not (repo_path / ".git").exists():
-        logger.error(f"Not a git repository: {repo_path}")
+        log.error(f"Not a git repository: {repo_path}")
         return False
 
     valid, error = validate_branch_name(branch_name)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     with _in_directory(repo_path):
@@ -134,13 +134,13 @@ def git_checkout_new_branch(
             error_msg = (
                 result["stderr"].strip() if result["stderr"] else "Unknown error"
             )
-            logger.error(
+            log.error(
                 f"Failed to create branch {branch_name} in {repo_path}: {error_msg}"
             )
             return False
 
         if verbose:
-            logger.info(f"Switched to new branch: {branch_name}")
+            log.info(f"Switched to new branch: {branch_name}")
         return True
 
 

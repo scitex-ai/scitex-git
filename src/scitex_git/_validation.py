@@ -6,7 +6,6 @@
 Input validation utilities for git operations.
 """
 
-import re
 from pathlib import Path
 from typing import Tuple
 
@@ -98,7 +97,6 @@ def validate_path(path: Path, must_exist: bool = False) -> Tuple[bool, str]:
         if must_exist and not resolved.exists():
             return False, f"Path does not exist: {path}"
 
-        path_str = str(resolved)
         if ".." in path.parts:
             return False, "Path contains parent directory references"
 

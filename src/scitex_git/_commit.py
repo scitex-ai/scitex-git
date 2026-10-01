@@ -17,14 +17,14 @@ Examples
 
 from pathlib import Path
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
 from ._validation import validate_commit_message, validate_path
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+log = slogging.getLogger(__name__)
 
 
 def git_add_all(repo_path: Path, verbose: bool = True) -> bool:
@@ -53,11 +53,11 @@ def git_add_all(repo_path: Path, verbose: bool = True) -> bool:
     """
     valid, error = validate_path(repo_path, must_exist=True)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     if not (repo_path / ".git").exists():
-        logger.error(f"Not a git repository: {repo_path}")
+        log.error(f"Not a git repository: {repo_path}")
         return False
 
     with _in_directory(repo_path):
@@ -67,7 +67,7 @@ def git_add_all(repo_path: Path, verbose: bool = True) -> bool:
             error_msg = (
                 result["stderr"].strip() if result["stderr"] else "Unknown error"
             )
-            logger.error(f"Failed to add files to {repo_path}: {error_msg}")
+            log.error(f"Failed to add files to {repo_path}: {error_msg}")
             return False
 
         return True
@@ -102,16 +102,16 @@ def git_commit(repo_path: Path, message: str, verbose: bool = True) -> bool:
     """
     valid, error = validate_path(repo_path, must_exist=True)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     if not (repo_path / ".git").exists():
-        logger.error(f"Not a git repository: {repo_path}")
+        log.error(f"Not a git repository: {repo_path}")
         return False
 
     valid, error = validate_commit_message(message)
     if not valid:
-        logger.error(error)
+        log.error(error)
         return False
 
     with _in_directory(repo_path):
@@ -121,11 +121,11 @@ def git_commit(repo_path: Path, message: str, verbose: bool = True) -> bool:
             error_msg = (
                 result["stderr"].strip() if result["stderr"] else "Unknown error"
             )
-            logger.error(f"Failed to commit in {repo_path}: {error_msg}")
+            log.error(f"Failed to commit in {repo_path}: {error_msg}")
             return False
 
         if verbose:
-            logger.info("Commit created successfully")
+            log.info("Commit created successfully")
         return True
 
 
@@ -135,7 +135,7 @@ def main(args):
         return EXIT_SUCCESS if success else EXIT_FAILURE
     elif args.action == "commit":
         if not args.message:
-            logger.error("Message required for commit action")
+            log.error("Message required for commit action")
             return EXIT_FAILURE
         success = git_commit(args.repo_path, args.message, args.verbose)
         return EXIT_SUCCESS if success else EXIT_FAILURE

@@ -8,8 +8,12 @@ Git workflow operations combining multiple git commands.
 
 from pathlib import Path
 
+import scitex_logging as slogging
+
 from ._branch import git_branch_rename, git_checkout_new_branch
 from ._commit import git_add_all, git_commit
+
+log = slogging.getLogger(__name__)
 
 
 def setup_branches(repo_path: Path, template_name: str, verbose: bool = True) -> bool:
@@ -65,21 +69,17 @@ def _rollback_commit(repo_path: Path, verbose: bool = True) -> None:
     verbose : bool
         Enable verbose output
     """
-    from logging import getLogger
-    from ._vendor_sh import sh
-
     from ._utils import _in_directory
-
-    logger = getLogger(__name__)
+    from ._vendor_sh import sh
 
     with _in_directory(repo_path):
         result = sh(
             ["git", "reset", "--soft", "HEAD~1"], verbose=verbose, return_as="dict"
         )
         if result["success"]:
-            logger.info("Rolled back commit due to workflow failure")
+            log.info("Rolled back commit due to workflow failure")
         else:
-            logger.warning(f"Failed to rollback commit: {result['stderr']}")
+            log.warning(f"Failed to rollback commit: {result['stderr']}")
 
 
 __all__ = [
