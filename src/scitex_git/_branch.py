@@ -16,14 +16,14 @@ Examples
 
 from pathlib import Path
 
-from logging import getLogger
+import scitex_logging as slogging
 from ._vendor_sh import sh
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
 from ._validation import validate_branch_name, validate_path
 
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
 
 
 def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> bool:

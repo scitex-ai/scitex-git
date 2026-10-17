@@ -22,9 +22,9 @@ import subprocess
 import time
 from typing import Callable, TypeVar
 
-from logging import getLogger
+import scitex_logging as slogging
 
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
 
 T = TypeVar("T")
 

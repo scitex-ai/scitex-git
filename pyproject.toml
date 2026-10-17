@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "GitPython>=3.1",
+    "scitex-logging>=0.1.0",
 ]
 
 [project.optional-dependencies]

@@ -1,8 +1,8 @@
 scitex-git
 =============
 
-Small linear-algebra helpers (distance, geometric median, cosine, nannorm)
-extracted from the SciTeX ecosystem as a standalone package.
+Small git helpers (clone, snapshot, GitHub secrets/variables, CI workflow
+helpers) extracted from the SciTeX ecosystem as a standalone package.
 
 .. toctree::
    :maxdepth: 2
