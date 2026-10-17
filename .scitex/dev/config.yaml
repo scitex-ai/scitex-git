@@ -9,4 +9,22 @@ audit:
   root-whitelist:
     files:
       - codecov.yml          # CI/coverage config — must live at repo root
+  exemptions:
+    # PS-231 (workflow-duplication). The pytest-matrix leaf stays a leaf ON
+    # PURPOSE: branch protection on BOTH develop and main requires the
+    # leaf-published contexts pytest-matrix-on-ubuntu-py3.11/.12/.13
+    # (measured via the protection API 2026-10-17). Converting this file to
+    # the org caller renames its published contexts to
+    # `pytest-matrix / pytest-matrix-on-ubuntu-py3.<ver>`, which no remaining
+    # workflow could publish — every PR would wait forever on a check nothing
+    # emits. Conversion is blocked on a coordinated protection edit that must
+    # land with it; until then the leaf stays by exemption, not by neglect.
+    PS-231:
+      - path: .github/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml
+        line: 0
+        reason: >-
+          Leaf-published contexts pytest-matrix-on-ubuntu-py3.11/.12/.13 are
+          branch-protection-required on develop and main; converting renames
+          the contexts and strands every PR. Blocked on a coordinated
+          protection edit (see PS-231 BLOCKER 1).
 

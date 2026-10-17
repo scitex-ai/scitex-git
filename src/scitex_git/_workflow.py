@@ -65,12 +65,12 @@ def _rollback_commit(repo_path: Path, verbose: bool = True) -> None:
     verbose : bool
         Enable verbose output
     """
-    from logging import getLogger
+    import scitex_logging as slogging
     from ._vendor_sh import sh
 
     from ._utils import _in_directory
 
-    logger = getLogger(__name__)
+    logger = slogging.getLogger(__name__)
 
     with _in_directory(repo_path):
         result = sh(

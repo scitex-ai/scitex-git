@@ -9,13 +9,13 @@ Provides functions to initialize, find, and manage git repositories
 with different strategies (child, parent, origin).
 """
 
-from logging import getLogger
+import scitex_logging as slogging
 from pathlib import Path
 from typing import Optional
 
 from git import InvalidGitRepositoryError, Repo
 
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
 
 
 def find_parent_git(project_dir: Path) -> Optional[Path]:

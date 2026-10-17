@@ -16,6 +16,10 @@ import shlex
 import subprocess
 from typing import Any, Dict, List, Sequence, Union
 
+import scitex_logging as slogging
+
+log = slogging.getLogger(__name__)
+
 CommandInput = Union[Sequence[str], List[str]]
 
 
@@ -36,7 +40,7 @@ def sh(
     pretty = " ".join(shlex.quote(p) for p in cmd_list)
 
     if verbose:
-        print(f"$ {pretty}")
+        log.info(f"$ {pretty}")
 
     try:
         proc = subprocess.run(
@@ -73,10 +77,14 @@ def sh(
         }
 
     if verbose:
+        # Relay of subprocess bytes: a level prefix would corrupt the
+        # payload, so emit verbatim (single trailing newline) via the
+        # plain console. Exact bytes remain available in the result dict.
+        plain = slogging.getPlainConsole(__name__)
         if result["stdout"]:
-            print(result["stdout"], end="" if result["stdout"].endswith("\n") else "\n")
+            plain.emit(result["stdout"].rstrip("\n"))
         if result["stderr"]:
-            print(result["stderr"], end="" if result["stderr"].endswith("\n") else "\n")
+            plain.emit(result["stderr"].rstrip("\n"))
 
     if return_as == "dict":
         return result
