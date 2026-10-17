@@ -1,5 +1,8 @@
 API
 ===
 
-.. automodule:: scitex_git
-   :members:
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   api/*
