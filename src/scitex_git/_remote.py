@@ -8,13 +8,14 @@ Git remote operations.
 from pathlib import Path
 from typing import Optional
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
+_out = slogging.getPlainConsole(__name__)
 
 
 def get_remote_url(
@@ -236,7 +237,7 @@ def main(args):
     if args.action == "get-url":
         url = get_remote_url(args.repo_path, args.remote_name, args.verbose)
         if url:
-            print(url)
+            _out.emit(url)
             return EXIT_SUCCESS
         return EXIT_FAILURE
     elif args.action == "check-origin":
@@ -244,7 +245,7 @@ def main(args):
             logger.error("Expected URL required for check-origin action")
             return EXIT_FAILURE
         result = is_cloned_from(args.repo_path, args.expected_url, args.remote_name)
-        print(result)
+        _out.emit(str(result))
         return EXIT_SUCCESS if result else EXIT_FAILURE
 
 
