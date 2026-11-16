@@ -16,7 +16,16 @@ import shlex
 import subprocess
 from typing import Any, Dict, List, Sequence, Union
 
+import scitex_logging as slogging
+
 CommandInput = Union[Sequence[str], List[str]]
+
+_out = slogging.getPlainConsole(__name__)
+
+
+def _echo(text: str) -> None:
+    """Echo captured output verbatim; ``emit`` appends the final newline."""
+    _out.emit(text[:-1] if text.endswith("\n") else text)
 
 
 def sh(
@@ -36,7 +45,7 @@ def sh(
     pretty = " ".join(shlex.quote(p) for p in cmd_list)
 
     if verbose:
-        print(f"$ {pretty}")
+        _out.emit(f"$ {pretty}")
 
     try:
         proc = subprocess.run(
@@ -74,9 +83,9 @@ def sh(
 
     if verbose:
         if result["stdout"]:
-            print(result["stdout"], end="" if result["stdout"].endswith("\n") else "\n")
+            _echo(result["stdout"])
         if result["stderr"]:
-            print(result["stderr"], end="" if result["stderr"].endswith("\n") else "\n")
+            _echo(result["stderr"])
 
     if return_as == "dict":
         return result

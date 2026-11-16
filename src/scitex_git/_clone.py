@@ -8,12 +8,12 @@ Git clone operations.
 
 from pathlib import Path
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
 
 
 def clone_repo(

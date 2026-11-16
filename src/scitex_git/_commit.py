@@ -17,14 +17,14 @@ Examples
 
 from pathlib import Path
 
-from logging import getLogger
-from ._vendor_sh import sh
+import scitex_logging as slogging
 
 from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
 from ._validation import validate_commit_message, validate_path
+from ._vendor_sh import sh
 
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
 
 
 def git_add_all(repo_path: Path, verbose: bool = True) -> bool:
